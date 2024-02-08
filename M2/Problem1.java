@@ -1,3 +1,4 @@
+package M2;
 import java.util.Arrays;
 public class Problem1 {
 public static void main(String[] args) {
@@ -14,6 +15,13 @@ processArray(a4);
 static void processArray(int[] arr){
 System.out.println("Processing Array:" + Arrays.toString(arr));
 System.out.println("Odds output:");
+
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] % 2 !=0) {
+                System.out.print(arr[i] + "  ");
+            }
+
+}
 //hint: use the arr variable; don't diretly use the a1-a4 variables
 //TODO add/edit code here
 //end add/edit section
