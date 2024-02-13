@@ -138,7 +138,8 @@ public class NumberGuesser4 {
         } else {
             System.out.println("That's wrong");
         
-
+                // mbh3 = 02/12/2023 
+                
             // Higher or lower hint
             if (guess > number) {
                 System.out.println("Hint: Go lower!");
