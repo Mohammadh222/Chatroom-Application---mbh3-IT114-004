@@ -1,5 +1,37 @@
-.DS_Store
+##############################
+## Eclipse
+##############################
+.settings/
+bin/
+tmp/
+.metadata
+.classpath
+.project
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+.factorypath
+##############################
+## Java
+##############################
+.mtj.tmp/
 *.class
-.idea
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+
+#############################
+## Class Specifics
+#############################
+config.*
+*.log
+*.conf
+
 .vscode
-*.l
+sources.txt
+*.class
