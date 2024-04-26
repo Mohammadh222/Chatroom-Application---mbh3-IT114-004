@@ -1,0 +1,7 @@
+package Project.Common;
+
+/// mbh3
+ // 04/25/24 
+public enum PayloadType {
+    CONNECT, DISCONNECT, MESSAGE, CREATE_ROOM, JOIN_ROOM, LIST_ROOMS, CLIENT_ID, SYNC_CLIENT, READY, RESET_USER_LIST, GET_ROOMS, ROOM, ROOMS, ROLL,
+}
