@@ -200,6 +200,25 @@ public class ServerThread extends Thread {
      //mbh3
      //04/24/24 
 
+     private String formatMessage(String message) {
+        System.out.println("Original Message: " + message); // Debug
+    
+        message = message.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+        System.out.println("Escaped Message: " + message); // Debug
+    
+        message = message.replaceAll("\\*(.*?)\\*", "<b>$1</b>");
+        message = message.replaceAll("-(.*?)-", "<i>$1</i>");
+        message = message.replaceAll("_(.*?)_", "<u>$1</u>");
+        message = message.replaceAll("\\[r (.*?) r\\]", "<span style='color:red;'>$1</span>");
+        message = message.replaceAll("\\[g (.*?) g\\]", "<span style='color:green;'>$1</span>");
+        message = message.replaceAll("\\[b (.*?) b\\]", "<span style='color:blue;'>$1</span>");
+    
+        System.out.println("Formatted Message: " + message); // Debug
+    
+        return message;
+    }
+    
+
     private void processPayload(Payload p) {
         switch (p.getPayloadType()) {
             case CONNECT:
@@ -209,25 +228,30 @@ public class ServerThread extends Thread {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
                 break;
             case DISCONNECT:
                 if (currentRoom != null) {
                     Room.disconnectClient(this, currentRoom);
                 }
                 break;
+                
+            //mbh3
+            //04/25/24 
+
             case MESSAGE:
             if (currentRoom != null) {
-                if (p.getMessage().startsWith("/")) {
-                    handleCommand(p.getMessage());
+                if (!p.getMessage().startsWith("/")) {
+                    String formattedMessage = formatMessage(p.getMessage());
+                    currentRoom.sendMessage(this, formattedMessage);
+                    System.out.println("Broadcasting formatted message: " + formattedMessage); // Debug
                 } else {
-                    currentRoom.sendMessage(this, p.getMessage());
+                    handleCommand(p.getMessage());
                 }
             } else {
-                // TODO migrate to lobby if not in a room
-                Room.joinRoom(Constants.LOBBY, this);
+                System.out.println("No room associated with the message."); // Debug
             }
             break;
+        
             case CREATE_ROOM:
                 Room.createRoom(p.getMessage(), this);
                 break;
@@ -244,14 +268,11 @@ public class ServerThread extends Thread {
                     e.printStackTrace();
                 }
                 List<String> potentialRooms = Room.listRooms(searchString, limit);
-                this.sendListRooms(potentialRooms);
+                sendListRooms(potentialRooms);
                 break;
             default:
                 break;
-            
-
         }
-
     }
     
 

@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,7 +46,21 @@ public class Room implements AutoCloseable {
     public String getName() {
         return name;
     }
-
+    private String formatMessage(String message) {
+        // Format colors
+        message = message.replaceAll("\\[r (.*?) r\\]", "<font color='red'>$1</font>");
+        message = message.replaceAll("\\[g (.*?) g\\]", "<font color='green'>$1</font>");
+        message = message.replaceAll("\\[b (.*?) b\\]", "<font color='blue'>$1</font>");
+    
+        // Format bold, italics, and underline
+        message = message.replaceAll("\\*(.*?)\\*", "<b>$1</b>");
+        message = message.replaceAll("-(.*?)-", "<i>$1</i>");
+        message = message.replaceAll("_(.*?)_", "<u>$1</u>");
+    
+        return message;
+    }
+    
+  
     protected synchronized void addClient(ServerThread client) {
         if (!isRunning) {
             return;
@@ -77,6 +93,7 @@ public class Room implements AutoCloseable {
         checkClients();
     }
 
+    
     /***
      * Checks the number of clients.
      * If zero, begins the cleanup process to dispose of the room
@@ -123,6 +140,7 @@ public class Room implements AutoCloseable {
                      * Room.disconnectClient(client, this);
                      * break;
                      */
+                    
                     default:
                         wasCommand = false;
                         break;
@@ -136,6 +154,11 @@ public class Room implements AutoCloseable {
     }
 
     // Command helper methods
+
+    //mbh3
+    //04/25/24
+
+    
     private synchronized void syncClientList(ServerThread joiner) {
         Iterator<ServerThread> iter = clients.iterator();
         while (iter.hasNext()) {
@@ -145,6 +168,7 @@ public class Room implements AutoCloseable {
             }
         }
     }
+    
     protected static void createRoom(String roomName, ServerThread client) {
         if (Server.INSTANCE.createNewRoom(roomName)) {
             // server.joinRoom(roomName, client);
@@ -244,7 +268,7 @@ public class Room implements AutoCloseable {
             clientsCopy = new HashSet<>(clients);
         }
 
-        // Iterating over the client set copy to send messages
+        // Iterating over  the client set copy to send messages
         for (ServerThread client : clientsCopy) {
             client.sendMessage(client.getClientId(), message);
     
