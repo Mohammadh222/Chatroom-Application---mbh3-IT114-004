@@ -3,20 +3,9 @@ package Project.Common;
 import java.io.Serializable;
 
 public class Payload implements Serializable {
-
-    private long clientId;
-
-    public long getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(long clientId) {
-        this.clientId = clientId;
-    }
-/// mbh3
- // 04/25/24 
     // read https://www.baeldung.com/java-serial-version-uid
-    private static final long serialVersionUID = 1L;// change this if the class changes
+    private static final long serialVersionUID = 3L;// change this if the class changes
+
     /**
      * Determines how to process the data on the receiver's side
      */
@@ -29,9 +18,34 @@ public class Payload implements Serializable {
     public void setPayloadType(PayloadType payloadType) {
         this.payloadType = payloadType;
     }
-    /**
-     * Generic text based message
-     */
+
+    // mbh3
+    //04/24/24 
+    // Who the payload is from
+    
+    
+    private String clientName;
+
+    //gettter method to retrieve the sender name
+    public String getClientName() {
+        return clientName;
+    }
+
+    //setter method to set the sender name
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
+    }
+
+    private long clientId;
+
+    public long getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(long clientId) {
+        this.clientId = clientId;
+    }
+
     private String message;
 
     public String getMessage() {
@@ -42,10 +56,20 @@ public class Payload implements Serializable {
         this.message = message;
     }
 
+    private int number;
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
 
     @Override
     public String toString() {
-        return String.format("Type[%s], Message[%s], ClientId[%s]", getPayloadType().toString(),
-                getMessage(), getClientId());
+        return String.format("ClientId[%s], ClientName[%s], Type[%s], Number[%s], Message[%s]", getClientId(),
+                getClientName(), getPayloadType().toString(), getNumber(),
+                getMessage());
     }
 }

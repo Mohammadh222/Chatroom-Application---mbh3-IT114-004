@@ -4,17 +4,21 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.List;
-import java.util.Random;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import Project.Common.ConnectionPayload;
-import Project.Common.Constants;
 import Project.Common.Payload;
 import Project.Common.PayloadType;
 import Project.Common.RoomResultsPayload;
-import Project.Common.TextFX;
-import Project.Common.TextFX.Color;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A server-side representation of a single client
@@ -23,45 +27,55 @@ public class ServerThread extends Thread {
     private Socket client;
     private String clientName;
     private boolean isRunning = false;
-    private long clientId = Constants.DEFAULT_CLIENT_ID;
     private ObjectOutputStream out;// exposed here for send()
     // private Server server;// ref to our server so we can call methods on it
     // more easily
     private Room currentRoom;
-    private Logger logger = Logger.getLogger(ServerThread.class.getName());
+    private static Logger logger = Logger.getLogger(ServerThread.class.getName());
+    private long myId;
+    private boolean isMuted = false;
+    //private ConcurrentHashMap<String, Boolean> muteList = new ConcurrentHashMap<>();
+    private Set<String> muteList = Collections.synchronizedSet(new HashSet<>());
 
-    private void info(String message) {
-        logger.info(String.format("Thread[%s]: %s", getClientName(), message));
+
+
+    public void setClientId(long id) {
+        myId = id;
     }
 
-    public ServerThread(Socket myClient/* , Room room */) {
-        info("Thread created");
-        // get communication channels to single client
-        this.client = myClient;
-        // this.currentRoom = room;
-
+    public long getClientId() {
+        return myId;
     }
 
-    protected void setClientId(long id) {
-        clientId = id;
-        if (id == Constants.DEFAULT_CLIENT_ID) {
-            logger.info(TextFX.colorize("Client id reset", Color.WHITE));
-        }
-        sendClientId(id);
-    }
-
-    protected boolean isRunning() {
+    public boolean isRunning() {
         return isRunning;
     }
+
+    private void info(String message) {
+        System.out.println(String.format("Thread[%s]: %s", getId(), message));
+    }
+
+    public ServerThread(Socket myClient, Room room) {
+        info("Thread created");
+        loadMuteListFromFile();
+        // get communication channels to single client
+        this.client = myClient;
+        this.currentRoom = room;
+
+    }
+
+    //mbh3
+    //04/24/24 
+
     protected void setClientName(String name) {
         if (name == null || name.isBlank()) {
-            logger.severe("Invalid client name being set");
+            System.err.println("Invalid client name being set");
             return;
         }
         clientName = name;
     }
 
-    protected String getClientName() {
+    public String getClientName() {
         return clientName;
     }
 
@@ -78,67 +92,71 @@ public class ServerThread extends Thread {
     }
 
     public void disconnect() {
+        sendConnectionStatus(myId, getClientName(), false);
         info("Thread being disconnected by server");
         isRunning = false;
         cleanup();
     }
 
     // send methods
-    protected boolean sendClientMapping(long id, String name) {
-        ConnectionPayload cp = new ConnectionPayload();
-        cp.setPayloadType(PayloadType.SYNC_CLIENT);
-        cp.setClientId(id);
-        cp.setClientName(name);
-        return send(cp);
-    }
 
-    protected boolean sendJoinRoom(String roomName) {
+    public boolean sendRoomName(String name) {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.JOIN_ROOM);
-        p.setMessage(roomName);
+        p.setMessage(name);
         return send(p);
     }
 
-    protected boolean sendClientId(long id) {
-        ConnectionPayload cp = new ConnectionPayload();
-        cp.setClientId(id);
-        cp.setClientName(clientName);
-        return send(cp);
-    }
-    private boolean sendListRooms(List<String> potentialRooms) {
-        RoomResultsPayload rp = new RoomResultsPayload();
-        rp.setRooms(potentialRooms);
-        if (potentialRooms == null) {
-            rp.setMessage("Invalid limit, please choose a value between 1-100");
-        } else if (potentialRooms.size() == 0) {
-            rp.setMessage("No rooms found matching your search criteria");
+    public boolean sendRoomsList(String[] rooms, String message) {
+        RoomResultsPayload payload = new RoomResultsPayload();
+        payload.setRooms(rooms);
+        if(message != null){
+            payload.setMessage(message);
         }
-        return send(rp);
+        return send(payload);
     }
 
-    public boolean sendMessage(long from, String message) {
+    public boolean sendExistingClient(long clientId, String clientName) {
         Payload p = new Payload();
-        p.setPayloadType(PayloadType.MESSAGE);
-        // p.setClientName(from);
-        p.setClientId(from);
-        p.setMessage(message);
+        p.setPayloadType(PayloadType.SYNC_CLIENT);
+        p.setClientId(clientId);
+        p.setClientName(clientName);
         return send(p);
     }
 
-    /**
-     * Used to associate client names and their ids from the server perspective
-     * 
-     * @param whoId       id of who is connecting/disconnecting
-     * @param whoName     name of who is connecting/disconnecting
-     * @param isConnected status of connection (true connecting, false,
-     *                    disconnecting)
-     * @return
-     */
-    public boolean sendConnectionStatus(long whoId, String whoName, boolean isConnected) {
-        ConnectionPayload p = new ConnectionPayload(isConnected);
-        // p.setClientName(who);
-        p.setClientId(whoId);
-        p.setClientName(whoName);
+    public boolean sendResetUserList() {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.RESET_USER_LIST);
+        return send(p);
+    }
+
+    public boolean sendClientId(long id) {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.CLIENT_ID);
+        p.setClientId(id);
+        return send(p);
+    }
+
+    public boolean sendMessage(long clientId, String message) {
+        if (!isMuted && !isRecipientMuted(clientId)) {
+            // Process text triggers
+            message = TextMessage (message);
+        
+            Payload p = new Payload();
+            p.setPayloadType(PayloadType.MESSAGE);
+            p.setClientId(clientId);
+            p.setMessage(message);
+            return send(p);
+        }
+        return false;
+    }
+    
+
+    public boolean sendConnectionStatus(long clientId, String who, boolean isConnected) {
+        Payload p = new Payload();
+        p.setPayloadType(isConnected ? PayloadType.CONNECT : PayloadType.DISCONNECT);
+        p.setClientId(clientId);
+        p.setClientName(who);
         p.setMessage(isConnected ? "connected" : "disconnected");
         return send(p);
     }
@@ -146,7 +164,10 @@ public class ServerThread extends Thread {
     private boolean send(Payload payload) {
         // added a boolean so we can see if the send was successful
         try {
+            // TODO add logger
+            logger.log(Level.FINE, "Outgoing payload: " + payload);
             out.writeObject(payload);
+            logger.log(Level.INFO, "Sent payload: " + payload);
             return true;
         } catch (IOException e) {
             info("Error sending message to client (most likely disconnected)");
@@ -155,7 +176,7 @@ public class ServerThread extends Thread {
             cleanup();
             return false;
         } catch (NullPointerException ne) {
-            info("Message was attempted to be sent before outbound stream was opened");
+            info("Message was attempted to be sent before outbound stream was opened: " + payload);
             return true;// true since it's likely pending being opened
         }
     }
@@ -189,135 +210,259 @@ public class ServerThread extends Thread {
         }
     }
 
-    /**  mbh3
-     * 04/25/24 
-     * 
-     * Used to process payloads from the client and handle their data
-     * 
-     * @param p
-     */
+    //mbh3 
+    //04/24/24 
+    //process rollcommand applied 
 
-     //mbh3
-     //04/24/24 
-
-     private String formatMessage(String message) {
-        System.out.println("Original Message: " + message); // Debug
-    
-        message = message.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
-        System.out.println("Escaped Message: " + message); // Debug
-    
-        message = message.replaceAll("\\*(.*?)\\*", "<b>$1</b>");
-        message = message.replaceAll("-(.*?)-", "<i>$1</i>");
-        message = message.replaceAll("_(.*?)_", "<u>$1</u>");
-        message = message.replaceAll("\\[r (.*?) r\\]", "<span style='color:red;'>$1</span>");
-        message = message.replaceAll("\\[g (.*?) g\\]", "<span style='color:green;'>$1</span>");
-        message = message.replaceAll("\\[b (.*?) b\\]", "<span style='color:blue;'>$1</span>");
-    
-        System.out.println("Formatted Message: " + message); // Debug
-    
-        return message;
-    }
-    
-
-    private void processPayload(Payload p) {
+    void processPayload(Payload p) {
         switch (p.getPayloadType()) {
             case CONNECT:
-                try {
-                    ConnectionPayload cp = (ConnectionPayload) p;
-                    setClientName(cp.getClientName());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                setClientName(p.getClientName());
+                saveMuteListToFile();
                 break;
             case DISCONNECT:
-                if (currentRoom != null) {
-                    Room.disconnectClient(this, currentRoom);
+                Room.disconnectClient(this, getCurrentRoom());
+                saveMuteListToFile();
+                break;
+            case MESSAGE: 
+
+            /// TODO migrate to lobby 
+//mbh3
+//04/24/24 
+
+                String message = p.getMessage();
+        
+                if (message.startsWith("/roll")) {
+                    processRollCommand(message);
+
+                } else if (message.startsWith("/flip")) {
+                    processFlipCommand();
+               
+                } else if (message.startsWith("@")) {
+                    processPrivateMessage(message);
+            
+                } else if (message.startsWith("mute ")){
+                    processMuteCommand(message);
+             
+                } else if (message.startsWith("unmute ")){
+                    processUnmuteCommand(message);
+                } else {               
+                    if (currentRoom != null) {
+                        currentRoom.sendMessage(this, p.getMessage());
+                    } else {
+                        logger.log(Level.INFO, "Migrating to lobby on message with null room");
+                        Room.joinRoom("lobby", this);
+                    }
                 }
                 break;
-                
-            //mbh3
-            //04/25/24 
-
-            case MESSAGE:
-            if (currentRoom != null) {
-                if (!p.getMessage().startsWith("/")) {
-                    String formattedMessage = formatMessage(p.getMessage());
-                    currentRoom.sendMessage(this, formattedMessage);
-                    System.out.println("Broadcasting formatted message: " + formattedMessage); // Debug
-                } else {
-                    handleCommand(p.getMessage());
-                }
-            } else {
-                System.out.println("No room associated with the message."); // Debug
-            }
-            break;
-        
+            case GET_ROOMS:
+                Room.getRooms(p.getMessage().trim(), this);
+                break;
             case CREATE_ROOM:
-                Room.createRoom(p.getMessage(), this);
+                Room.createRoom(p.getMessage().trim(), this);
                 break;
             case JOIN_ROOM:
-                Room.joinRoom(p.getMessage(), this);
-                break;
-            case LIST_ROOMS:
-                String searchString = p.getMessage() == null ? "" : p.getMessage();
-                int limit = 10;
-                try {
-                    RoomResultsPayload rp = ((RoomResultsPayload) p);
-                    limit = rp.getLimit();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                List<String> potentialRooms = Room.listRooms(searchString, limit);
-                sendListRooms(potentialRooms);
+                Room.joinRoom(p.getMessage().trim(), this);
                 break;
             default:
                 break;
+
+        }
+
+
+    }
+
+    //mbh3
+    //04/24/24 
+    /// message coloring italic and bolds 
+
+    private String TextMessage (String message) {
+
+        message = message.replaceAll("\\*(.*?)\\*", "<b>$1</b>"); //makes the text bold 
+
+        message = message.replaceAll("_(.*?)_", "<i>$1</i>");   /// makes the text italics 
+        
+        message = message.replaceAll("\\+(.*?)\\+", "<u>$1</u>"); // makes the text underline 
+
+        message = message.replaceAll("\\[color:red\\](.*?)\\[/color\\]", "<font color=\"red\">$1</font>"); //red color
+        message = message.replaceAll("\\[color:blue\\](.*?)\\[/color\\]", "<font color=\"blue\">$1</font>"); // blue color
+        message = message.replaceAll("\\[color:green\\](.*?)\\[/color\\]", "<font color=\"green\">$1</font>"); //green color 
+
+        return message;
+    }
+
+    //mbh3 
+    //04/24/24 
+    //rolling dice game 
+    
+    private void processRollCommand(String message) { 
+        try {
+        if (message.contains("d")) {
+        
+            String[] rollParts = message.substring(6).split("d");
+            if (rollParts.length == 2) {
+               
+                int numDice = Integer.parseInt(rollParts[0]);
+                int numSides = Integer.parseInt(rollParts[1]);
+                if (numDice > 0 && numSides > 0) {
+                    int result = 0;
+                    StringBuilder rollResult = new StringBuilder("<b> Outcomes From Rolling Dice :</b> ");
+                    for (int i = 0; i < numDice; i++) {
+                        int roll = (int) (Math.random() * numSides) + 1;
+                        result += roll;
+                        rollResult.append(roll);
+                        if (i < numDice - 1) {
+                            rollResult.append("<b>, </b>");
+                        }
+                    }
+                    rollResult.append("<b>. RESULTS: ").append(result).append("</b>");
+                    if (currentRoom != null) {
+                        currentRoom.sendMessage(this, rollResult.toString());
+                    }
+                }
+            }
+        } else {
+            
+            int max = Integer.parseInt(message.substring(6).trim());
+            if (max > 0) {
+                int result = (int) (Math.random() * max) + 1;
+                String rollResult = "<b> Outcomes From Rolling Dice:  " + result+" </b>";
+                if (currentRoom != null) {
+                    currentRoom.sendMessage(this, rollResult);
+                }
+            }
+        }
+    } catch (NumberFormatException e) {
+        logger.log(Level.WARNING, "Invalid roll command: " + message);
+    }
+}
+
+//mbh3
+///04/24/24 
+// flip game head or tails 
+//private message method 
+
+
+    private void processFlipCommand() {
+    
+        String result = (Math.random() < 0.5) ? "Heads" : "Tails";
+        String flipResult = "<b>Coin Toss Outcome: " + result+" </b>";
+        if (currentRoom != null) {
+            currentRoom.sendMessage(this, flipResult);
+        }
+    }
+    private void processPrivateMessage(String message) {
+        int spaceIndex = message.indexOf(" ");
+        if (spaceIndex != -1) {
+            String receiverName = message.substring(1, spaceIndex);
+            String privateMessage = message.substring(spaceIndex + 1);
+            
+            if (currentRoom != null) {
+                ServerThread receiver = currentRoom.findClientByName(receiverName);
+                if (receiver != null) {
+                    sendMessage(getClientId(), " typing a private text to  "+ receiverName + ": " + privateMessage);
+                    receiver.sendMessage(getClientId(),getClientName()+"  text to you : " + privateMessage);
+                } else {
+                    sendMessage(getClientId(), "User " + receiverName + " cannot be found in the room ");
+                }
+            }
+        }
+    }   
+
+    ///mhb3
+    //04/24/24 
+    // mute and unmute 
+
+    private void processMuteCommand(String message) {
+        String targetUsername = message.substring(5).trim();
+        
+        if (currentRoom != null) {
+            ServerThread targetClient = currentRoom.findClientByName(targetUsername);
+            
+            if (targetClient != null) {
+                if (muteList.contains(targetUsername)) {
+                    sendMessage(getClientId(), targetUsername + " is already muted");
+                } else {
+                    muteList.add(targetUsername);
+                    saveMuteListToFile();
+                    targetClient.sendMessage(getClientId(), getClientName() + " muted you");
+                    sendMessage(getClientId(), "You muted " + targetUsername);
+                }
+            } else {
+                sendMessage(getClientId(), "User " + targetUsername + " not found in the room");
+            }
+        } else {
+            sendMessage(getClientId(), "Currently not in a room");
+        }
+    }
+        
+    private void processUnmuteCommand(String message) {
+        String targetUsername = message.substring(7).trim();
+        
+        if (currentRoom != null) {
+            ServerThread targetClient = currentRoom.findClientByName(targetUsername);
+            
+            if (targetClient != null) {
+                if (!muteList.contains(targetUsername)) {
+                    sendMessage(getClientId(), targetUsername + " is not muted");
+                } else {
+                    muteList.remove(targetUsername);
+                    saveMuteListToFile();
+                    targetClient.sendMessage(getClientId(), getClientName() + " unmuted you");
+                    sendMessage(getClientId(), "You unmuted " + targetUsername);
+                }
+            } else {
+                sendMessage(getClientId(), "User " + targetUsername + " not found in the room");
+            }
+        } else {
+            sendMessage(getClientId(), "Currently not in a room");
         }
     }
     
-
-/// mbh3 
-//04/25/24 
-private void handleCommand(String command) {
-    if (command.startsWith("/roll")) {
-        handleRollCommand(command.substring(6)); 
-    } else if (command.equals("/flip")) {
-        handleFlipCommand();
+    public boolean isMuted() {
+        return isMuted;
     }
-}
-private void handleRollCommand(String parameter) {
-    try {
-        Random random = new Random();
-        if (parameter.contains("d")) {
-            String[] parts = parameter.split("d");
-            int rolls = Integer.parseInt(parts[0]);
-            int sides = Integer.parseInt(parts[1]);
-            int total = 0;
-            for (int i = 0; i < rolls; i++) {
-                total += random.nextInt(sides) + 1;
+    public void setMuted(boolean isMuted) {
+        this.isMuted = isMuted;
+    }
+
+    //mbh3
+    //04/24/24
+    // list of muted Users 
+
+    private void saveMuteListToFile() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(clientName + "_muteList.csv"))) {
+            for (String mutedClient : muteList) {
+                writer.write(mutedClient + ",");
+                writer.newLine();
             }
-            currentRoom.broadcastMessage(clientName + " rolled " + rolls + "d" + sides + ": " + total);
-        } else {
-            int max = Integer.parseInt(parameter);
-            int result = random.nextInt(max) + 1;
-            currentRoom.broadcastMessage(clientName + " rolled a die: " + result);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error writing to mute list file", e);
         }
-    } catch (NumberFormatException e) {
-        sendMessage(clientId, "Invalid format for roll command. Use /roll X or /roll NdX.");
-    } catch (Exception e) {
-        sendMessage(clientId, "Error processing roll command.");
-        e.printStackTrace(); 
     }
-}
-///mbh3 
-// 04/25/24
-private void handleFlipCommand() {
-    Random random = new Random();
-    boolean flip = random.nextBoolean();
-    currentRoom.broadcastMessage(flip ? "Heads" : "Tails");
-}
 
+    private void loadMuteListFromFile() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(clientName + "_muteList.csv"))) {
+            String[] mutedClients = reader.readLine().split(",");
+            Collections.addAll(muteList, mutedClients);
+        } catch (IOException e) {
+        }
+    }
 
+    public boolean isRecipientMuted(long clientId) {
+        ServerThread targetClient = currentRoom.findClientById(clientId);
+        if (targetClient != null) {
+            String targetUsername = targetClient.getClientName();
+            return muteList.contains(targetUsername);
+        }
+        return false;
+    }
+
+    public boolean hasUserMuted(String username) {
+        return muteList.contains(username);
+    }
+
+    
     private void cleanup() {
         info("Thread cleanup() start");
         try {
@@ -328,7 +473,8 @@ private void handleFlipCommand() {
         info("Thread cleanup() complete");
     }
 
-    public long getClientId() {
-        return clientId;
+    public void setCurrentRoom(Project.Common.Room room) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setCurrentRoom'");
     }
 }
