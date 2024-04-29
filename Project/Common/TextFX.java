@@ -1,20 +1,9 @@
 package Project.Common;
 
-import Project.Common.TextFX.Color;
-
 public abstract class TextFX {
     // For chatroom projects, this does not satisfy the text formatting
     // feature/requirements
-
-    //mbh3 
-    // 04/24/24 
-    private boolean bold;
-    private boolean italic;
-    private boolean underline;
-    private Color color;
-
     public enum Color {
-        
         BLACK("\033[0;30m"),
         RED("\033[0;31m"),
         GREEN("\033[0;32m"),
