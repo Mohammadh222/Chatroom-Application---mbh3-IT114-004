@@ -31,9 +31,9 @@ import Project.Client.Views.UserListPanel;
 import Project.Common.Constants;
 
 public class ClientUI extends JFrame implements IClientEvents, ICardControls {
-    private CardLayout card = null;// accessible so we can call next() and previous()
-    private Container container;// accessible to be passed to card methods
-    private String originalTitle = null;
+    CardLayout card = null;// accessible so we can call next() and previous()
+    Container container;// accessible to be passed to card methods
+    String originalTitle = null;
     private static Logger logger = Logger.getLogger(ClientUI.class.getName());
     private JPanel currentCardPanel = null;
     private CardView currentCard = CardView.CONNECT;
@@ -48,27 +48,6 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
     private RoomsPanel roomsPanel;
     private ChatPanel chatPanel;
     private UserListPanel userListPanel;
-
-
-public interface IClientEvents {
-    // ... other methods ...
-    void onReceiveRoomList(List<String> rooms, String message);
-    // ... other methods ...
-}
-
-@Override
-public void onReceiveRoomList(List<String> rooms, String message) {
-    roomsPanel.removeAllRooms();
-    if (message != null && !message.isEmpty()) {
-        roomsPanel.setMessage(message);
-    }
-    if (rooms != null) {
-        for (String room : rooms) {
-            roomsPanel.addRoom(room);
-        }
-    }
-}
-
 
     public ClientUI(String title) {
         super(title);// call the parent's constructor
@@ -124,8 +103,7 @@ public void onReceiveRoomList(List<String> rooms, String message) {
                 }
             }
         });
-        // lastly
-        pack();// tells the window to resize itself and do the layout management
+        pack();
         setVisible(true);
     }
 
@@ -146,6 +124,9 @@ public void onReceiveRoomList(List<String> rooms, String message) {
 
     //mbh3
     //04/24/24
+    //chat export methood here implemented 
+
+
     public void exportChatHistory() {
         try {
             JFileChooser fileChooser = new JFileChooser();
@@ -154,21 +135,18 @@ public void onReceiveRoomList(List<String> rooms, String message) {
                 File selectedFile = fileChooser.getSelectedFile();
                 FileWriter writer = new FileWriter(selectedFile);
     
-                // Get chat history from the chat panel
+            
                 List<String> chatHistory = chatPanel.getChatHistory();
     
-                // Write chat history to the file
                 for (String message : chatHistory) {
                     writer.write(message + "\n");
                 }
     
                 writer.close();
 
-                // Display a message to notify the user about the successful completion of the export.
-                JOptionPane.showMessageDialog(this, "Chat history exported successfully.", "Export Completed", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Chat history successfully exported ", "Chat export completed ", JOptionPane.INFORMATION_MESSAGE);
             }
         } catch (IOException ex) {
-            // Print the stack trace for debugging purposes if an IOException happens during file handling operations.
             ex.printStackTrace();
         }
     }
@@ -185,15 +163,13 @@ public void onReceiveRoomList(List<String> rooms, String message) {
         
     }
 
-    //mbh3
-    //04/24/24
-    
 
+    @Override
     public void onUserMuted(long userId) {
         userListPanel.muteUser(userId); 
     }
 
-    
+    @Override
     public void onUserUnmuted(long userId) {
         userListPanel.unmuteUser(userId); 
     }
@@ -277,8 +253,10 @@ public void onReceiveRoomList(List<String> rooms, String message) {
         }
     }
 
-    //mbh3
+  //mbh3
     //04/24/24
+    /// onMessageReceive here 
+
     @Override
     public void onMessageReceive(long clientId, String message) {
         if (currentCard.ordinal() >= CardView.CHAT.ordinal()) {
@@ -294,7 +272,7 @@ public void onReceiveRoomList(List<String> rooms, String message) {
             myId = id;
             show(CardView.CHAT.name());
         } else {
-            logger.log(Level.WARNING, "Received client id after already being set, this shouldn't happen");
+            logger.log(Level.WARNING, "Client ID received after already being set, shouldnt repeat agin");
         }
     }
 
@@ -310,13 +288,30 @@ public void onReceiveRoomList(List<String> rooms, String message) {
             processClientConnectionStatus(clientId, clientName, true);
         }
     }
-   
 
-    
+    @Override
+    public void onReceiveRoomList(String[] rooms, String message) {
+        roomsPanel.removeAllRooms();
+        if (message != null && message.length() > 0) {
+            roomsPanel.setMessage(message);
+        }
+        if (rooms != null) {
+            for (String room : rooms) {
+                roomsPanel.addRoom(room);
+            }
+        }
+    }
+
     @Override
     public void onRoomJoin(String roomName) {
         if (currentCard.ordinal() >= CardView.CHAT.ordinal()) {
             chatPanel.addText("Joined room " + roomName);
         }
+    }
+
+    @Override
+    public void onReceiveRoomList(List<String> rooms, String message) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'onReceiveRoomList'");
     }
 }

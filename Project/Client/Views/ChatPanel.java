@@ -59,7 +59,7 @@ public class ChatPanel extends JPanel {
         input.setLayout(new BoxLayout(input, BoxLayout.X_AXIS));
         JTextField textValue = new JTextField();
         input.add(textValue);
-        new JButton("Send");
+        JButton button = new JButton("Send");
         // lets us submit with the enter key instead of just the button click
         textValue.addKeyListener(new KeyListener() {
 
@@ -149,10 +149,6 @@ public class ChatPanel extends JPanel {
         return chatHistory;
     }
 
-    //mbh3
-    //04/24/24 
-
-    // This method highlights the user in the UserListPanel when they send a message
     public void highlightUser(long clientId) {
         userListPanel.updateUserListItem(clientId);
     }
@@ -162,24 +158,28 @@ public class ChatPanel extends JPanel {
         userListPanel.addUserListItem(clientId, clientName);
     }
      
-    
+
     public void removeUserListItem(long clientId){
         userListPanel.removeUserListItem(clientId);
     }
     public void clearUserList(){
         userListPanel.clearUserList();
     }
+
+     ///mbh3 
+   ///04/24/24 
+
     public void addText(String text) {
-        // Bold trigger: *text*
-        text = text.replaceAll("\\*(.*?)\\*", "<b>$1</b>");
+    
+       
+        text = text.replaceAll("\\*(.*?)\\*", "<b>$1</b>"); // bold text 
 
-        // Italics trigger: _text_
-        text = text.replaceAll("_(.*?)_", "<i>$1</i>");
+        text = text.replaceAll("_(.*?)_", "<i>$1</i>");   //italics text 
 
-        // Underline trigger: +text+
-        text = text.replaceAll("\\+(.*?)\\+", "<u>$1</u>");
+        text = text.replaceAll("\\+(.*?)\\+", "<u>$1</u>"); // underline texts 
 
-        // Color trigger: [color:red]text[/color]
+        // color red, blue, green 
+
         text = text.replaceAll("\\[color:red\\](.*?)\\[/color\\]", "<font color=\"red\">$1</font>");
         text = text.replaceAll("\\[color:blue\\](.*?)\\[/color\\]", "<font color=\"blue\">$1</font>");
         text = text.replaceAll("\\[color:green\\](.*?)\\[/color\\]", "<font color=\"green\">$1</font>");

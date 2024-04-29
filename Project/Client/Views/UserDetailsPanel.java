@@ -18,10 +18,10 @@ import Project.Client.ICardControls;
 /**
  * Formerly UserInputPanel
  */
-public class UserDetailsPanel extends JPanel {
-    private static Logger logger = Logger.getLogger(UserDetailsPanel.class.getName());
-    private String username;
 
+public class UserDetailsPanel extends JPanel{
+    private static Logger logger = Logger.getLogger(UserDetailsPanel.class.getName()); 
+    private String username;
     public UserDetailsPanel(ICardControls controls) {
         super(new BorderLayout(10, 10));
         JPanel content = new JPanel();
@@ -45,8 +45,8 @@ public class UserDetailsPanel extends JPanel {
             boolean isValid = true;
 
             try {
-                String incomingUsername = userValue.getText();
-                if (incomingUsername.trim().length() == 0) {
+                username = userValue.getText();
+                if (username.trim().length() == 0) {
                     userError.setText("Username must be provided");
                     userError.setVisible(true);
                     isValid = false;
@@ -58,7 +58,6 @@ public class UserDetailsPanel extends JPanel {
             }
             if (isValid) {
                 // System.out.println("Chosen username: " + username);
-                username = userValue.getText();
                 logger.log(Level.INFO, "Chosen username: " + username);
                 userError.setVisible(false);
                 controls.connect();
@@ -78,8 +77,7 @@ public class UserDetailsPanel extends JPanel {
         this.setName(CardView.USER_INFO.name());
         controls.addPanel(CardView.USER_INFO.name(), this);
     }
-
-    public String getUsername() {
+    public String getUsername(){
         return username;
     }
 }

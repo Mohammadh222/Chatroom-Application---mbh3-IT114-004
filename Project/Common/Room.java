@@ -1,4 +1,4 @@
-package Project.Server;
+package Project.Common;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +11,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import Project.Common.Constants;
+import Project.Server.Server;
+import Project.Server.ServerThread;
 
 public class Room implements AutoCloseable {
 	// server is a singleton now so we don't need this
@@ -165,11 +167,11 @@ public class Room implements AutoCloseable {
 		}
 	}
 
-	//protected static void disconnectClient(ServerThread client, Room room) {
-	//	client.setCurrentRoom(null);
-	//	client.disconnect();
-	//	room.removeClient(client);
-	//}
+	protected static void disconnectClient(ServerThread client, Room room) {
+		client.setCurrentRoom(null);
+		client.disconnect();
+		room.removeClient(client);
+	}
 	// end command helper methods
 
 	/***
@@ -284,11 +286,6 @@ public class Room implements AutoCloseable {
 		isRunning = false;
 		clients = null;
 	}
-
-    public static void disconnectClient(ServerThread serverThread, Room currentRoom) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'disconnectClient'");
-    }
 
     
 }

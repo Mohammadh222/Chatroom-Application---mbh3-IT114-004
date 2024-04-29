@@ -3,13 +3,12 @@ package Project.Common;
 import java.util.ArrayList;
 import java.util.List;
 
+//mbh3
+//04/24/24 
+
 public class RoomResultsPayload extends Payload {
     private List<String> rooms = new ArrayList<String>();
-    /**
-     * /// mbh3
- //     04/25/24 
-     * Used to limit the returned result set. Added after video recording.
-     */
+   
     private int limit = 10;
 
     public int getLimit() {
@@ -30,5 +29,10 @@ public class RoomResultsPayload extends Payload {
 
     public void setRooms(List<String> rooms) {
         this.rooms = rooms;
+    }
+
+    public void setRooms(String[] rooms2) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setRooms'");
     }
 }
