@@ -1,5 +1,6 @@
 package Project.Server;
 
+import Project.Common.TextFX;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,8 +11,6 @@ import java.util.Queue;
 import java.util.logging.Logger;
 
 import Project.Common.Constants;
-import Project.Common.TextFX;
-import Project.Common.TextFX.Color;
 
 import java.util.List;
 
@@ -57,7 +56,7 @@ public enum Server {
     }
 
     private void startQueueManager() {
-        logger.info(TextFX.colorize("Starting queue manager", Color.PURPLE));
+        logger.info(TextFX.colorize("Starting queue manager", TextFX.Color.PURPLE));
         new Thread() {
             @Override
             public void run() {
@@ -76,7 +75,7 @@ public enum Server {
                         }
                     }
                 }
-                logger.info(TextFX.colorize("Terminating queue manager", Color.PURPLE));
+                logger.info(TextFX.colorize("Terminating queue manager", TextFX.Color.PURPLE));
             }
         }.start();
     }

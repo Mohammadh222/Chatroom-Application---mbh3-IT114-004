@@ -14,7 +14,6 @@ import Project.Common.Payload;
 import Project.Common.PayloadType;
 import Project.Common.RoomResultsPayload;
 import Project.Common.TextFX;
-import Project.Common.TextFX.Color;
 
 /**
  * A server-side representation of a single client
@@ -45,7 +44,7 @@ public class ServerThread extends Thread {
     protected void setClientId(long id) {
         clientId = id;
         if (id == Constants.DEFAULT_CLIENT_ID) {
-            logger.info(TextFX.colorize("Client id reset", Color.WHITE));
+            logger.info(TextFX.colorize("Client id reset", TextFX.Color.WHITE));
         }
         sendClientId(id);
     }
