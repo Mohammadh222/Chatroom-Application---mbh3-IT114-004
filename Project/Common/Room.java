@@ -288,5 +288,4 @@ public class Room implements AutoCloseable {
 		clients = null;
 	}
 
-    
 }

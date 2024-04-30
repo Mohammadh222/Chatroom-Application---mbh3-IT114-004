@@ -5,7 +5,7 @@ import java.util.List;
 
 //mbh3
 //04/24/24 
-//extends payload 
+//payload 
 
 public class RoomResultsPayload extends Payload {
     private List<String> rooms = new ArrayList<String>();
@@ -36,4 +36,5 @@ public class RoomResultsPayload extends Payload {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'setRooms'");
     }
+    
 }
