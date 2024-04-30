@@ -55,12 +55,12 @@ public class ConnectionPanel extends JPanel {
             }
         });
         content.add(button);
-        // filling the other slots for spacing
+
         this.add(new JPanel(), BorderLayout.WEST);
         this.add(new JPanel(), BorderLayout.EAST);
         this.add(new JPanel(), BorderLayout.NORTH);
         this.add(new JPanel(), BorderLayout.SOUTH);
-        // add the content to the center slot
+
         this.add(content, BorderLayout.CENTER);
         this.setName(CardView.CONNECT.name());
         controls.addPanel(CardView.CONNECT.name(), this);

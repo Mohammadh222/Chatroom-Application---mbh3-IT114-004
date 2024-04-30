@@ -10,6 +10,7 @@ import Project.Client.ICardControls;
 
 //mbh3
 //04/24/24
+// extedns JMenuBar
 
 public class Menu extends JMenuBar {
     public Menu(ICardControls controls) {
