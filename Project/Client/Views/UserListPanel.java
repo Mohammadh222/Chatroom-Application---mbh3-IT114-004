@@ -64,6 +64,7 @@ public class UserListPanel extends JPanel {
 
     //mbh3
     //04/24/24 
+    //
 
     protected void addUserListItem(long clientId, String clientName) {
         logger.log(Level.INFO, "Adding user to list: " + clientName);
@@ -88,7 +89,8 @@ public class UserListPanel extends JPanel {
  
     //mbh3
     //04/24/24 
-
+    //background color 
+    
     protected void updateUserListItem(long clientId) {
         logger.log(Level.INFO, "Updating display color for user with ID: " + clientId);
     
@@ -97,8 +99,6 @@ public class UserListPanel extends JPanel {
         for (Component c : cs) {
             boolean isUser = c.getName().equals(clientId + "");
     
-           // setting the background color to blue, I had to red before but i like the blue better 
-
             ((JEditorPane) c).setForeground((isUser ? Color.BLUE : Color.black));
         }
     }
