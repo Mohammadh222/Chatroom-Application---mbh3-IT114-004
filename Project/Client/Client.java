@@ -66,6 +66,8 @@ public enum Client {
         return isConnected();
     }
 
+    //mbh3
+    //04/24/24 
     // Send methods 
     public void sendCreateRoom(String room) throws IOException, NullPointerException {
         Payload p = new Payload();
@@ -149,6 +151,9 @@ public enum Client {
         fromServerThread.start();// start the thread
     }
 
+    //mbh3
+    //04/24/24
+    
     private void processPayload(Payload p) {
         logger.log(Level.FINE, "Received Payload: " + p);
         if (events == null) {

@@ -30,6 +30,8 @@ import Project.Client.Client;
 import Project.Client.ClientUtils;
 import Project.Client.ICardControls;
 
+//mbh3
+//04/24/24
 
 public class ChatPanel extends JPanel {
     private static Logger logger = Logger.getLogger(ChatPanel.class.getName());

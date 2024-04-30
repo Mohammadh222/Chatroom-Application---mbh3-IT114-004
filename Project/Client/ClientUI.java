@@ -30,6 +30,9 @@ import Project.Client.Views.UserDetailsPanel;
 import Project.Client.Views.UserListPanel;
 import Project.Common.Constants;
 
+//mbh3
+//04/24/24 
+
 public class ClientUI extends JFrame implements IClientEvents, ICardControls {
     CardLayout card = null;// accessible so we can call next() and previous()
     Container container;// accessible to be passed to card methods

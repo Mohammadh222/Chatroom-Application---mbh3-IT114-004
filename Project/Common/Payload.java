@@ -23,15 +23,12 @@ public class Payload implements Serializable {
     //04/24/24 
     // Who the payload is from and name 
     
-    
     private String clientName;
 
-    //gettter method to retrieve the sender name
     public String getClientName() {
         return clientName;
     }
 
-    //setter method to set the sender name
     public void setClientName(String clientName) {
         this.clientName = clientName;
     }

@@ -10,9 +10,12 @@ public class ConnectionPayload extends Payload {
         setPayloadType(isConnected ? PayloadType.CONNECT : PayloadType.DISCONNECT);
     }
 
-    /**
+    /** mbh3 
+     * 04/24/24 
      * Who the payload is from
      */
+
+     
     private String clientName;
 
     public String getClientName() {

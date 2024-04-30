@@ -1,8 +1,8 @@
 package Project.Common;
 
-/**
- * 
- */
+//mbh3
+//04/24/24 
+
 public class RoomResultPayload extends Payload{
     private String[] rooms;
     public RoomResultPayload(){

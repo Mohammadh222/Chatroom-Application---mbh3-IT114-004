@@ -189,7 +189,7 @@ public enum Server {
 
             return;
         }
-        // loop over rooms and send out the message
+
         Iterator<Room> it = rooms.iterator();
         while (it.hasNext()) {
             Room room = it.next();
