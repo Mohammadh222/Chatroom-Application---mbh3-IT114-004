@@ -23,3 +23,4 @@ public class RoomResultPayload extends Payload{
         this.rooms = rooms;
     }
 }
+

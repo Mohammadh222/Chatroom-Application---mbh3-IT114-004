@@ -185,7 +185,7 @@ public class Room implements AutoCloseable {
 
 	//mbh3
 	//04/24/24
-	// check when the users is mute or unmute before sending message 
+	// check when the users is muted or unmuted before sending anything  
 
 	protected synchronized void sendMessage(ServerThread sender, String message) {
 		if (!isRunning) {

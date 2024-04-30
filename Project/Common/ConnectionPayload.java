@@ -28,3 +28,4 @@ public class ConnectionPayload extends Payload {
         return super.toString() + ", Client name " + getClientName();
     }
 }
+

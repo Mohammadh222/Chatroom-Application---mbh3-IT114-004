@@ -1,6 +1,4 @@
-<<<<<<< HEAD
-Mohammad Hussain
-=======
 Mohammad Hussain 
->>>>>>> 842f6333f40737c4da0250498d69e90e50cd8e64
-IT114
+IT114-004 
+Information Technology - Cybersecurity and Networking 
+Hobby - Gym, Boxing, Soccer, Volleyball, Cricket, Traveling 
