@@ -64,6 +64,10 @@ public class UserDetailsPanel extends JPanel{
             }
         });
         // button holder
+
+        //mbh3
+        //04/24/24 
+        
         JPanel buttons = new JPanel();
         buttons.add(pButton);
         buttons.add(nButton);
