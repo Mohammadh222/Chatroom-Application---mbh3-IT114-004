@@ -52,7 +52,7 @@ public interface IClientEvents {
     
     //mbh3
     //04/24/24 
-    /// user muted, numted and room ane when added 
+    /// user muted, numted and room name  
 
     void onRoomJoin(String roomName);
     void onUserMuted(long userId);

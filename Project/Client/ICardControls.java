@@ -10,3 +10,4 @@ public interface ICardControls {
     void connect();
     void exportChatHistory();
 }
+

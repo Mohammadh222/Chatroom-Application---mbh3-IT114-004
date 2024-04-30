@@ -124,7 +124,7 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
 
     //mbh3
     //04/24/24
-    //chat export methood here implemented 
+    //chat export methood here  
 
 
     public void exportChatHistory() {
@@ -255,7 +255,7 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
 
   //mbh3
     //04/24/24
-    /// onMessageReceive here 
+    /// onMessageReceive here and how its working 
 
     @Override
     public void onMessageReceive(long clientId, String message) {

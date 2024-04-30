@@ -5,6 +5,7 @@ import java.util.List;
 
 //mbh3
 //04/24/24 
+//extends payload 
 
 public class RoomResultsPayload extends Payload {
     private List<String> rooms = new ArrayList<String>();

@@ -262,6 +262,7 @@ public class Room implements AutoCloseable {
 	
 	//mbh3
 	//04/24/24 
+	//code 
 
 	private synchronized void handleDisconnect(Iterator<ServerThread> iter, ServerThread client) {
 		if (iter != null) {

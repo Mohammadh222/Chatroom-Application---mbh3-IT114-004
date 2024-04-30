@@ -21,7 +21,7 @@ public class Payload implements Serializable {
 
     // mbh3
     //04/24/24 
-    // Who the payload is from
+    // Who the payload is from and name 
     
     
     private String clientName;
