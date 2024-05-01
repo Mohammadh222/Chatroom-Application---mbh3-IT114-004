@@ -369,9 +369,9 @@ public class ServerThread extends Thread {
         }
     }   
 
-    ///mhb3
+    //mbh3
     //04/24/24 
-    // mute and unmute 
+    //mutes target users command 
 
     private void processMuteCommand(String message) {
         String targetUsername = message.substring(5).trim();
@@ -395,6 +395,12 @@ public class ServerThread extends Thread {
             sendMessage(getClientId(), "Currently not in a room");
         }
     }
+
+    
+
+    //mbh3
+    //04/14/14 
+    //unmute command target users 
         
     private void processUnmuteCommand(String message) {
         String targetUsername = message.substring(7).trim();
@@ -426,9 +432,10 @@ public class ServerThread extends Thread {
         this.isMuted = isMuted;
     }
 
+
     //mbh3
     //04/24/24
-    // list of muted Users 
+    // list of muted Users and loads the uers as well 
 
     private void saveMuteListToFile() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(clientName + "_muteList.csv"))) {

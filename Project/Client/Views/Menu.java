@@ -8,9 +8,10 @@ import javax.swing.JMenuItem;
 import Project.Client.CardView;
 import Project.Client.ICardControls;
 
+
 //mbh3
 //04/24/24
-// extedns JMenuBar
+// how chat export is imported 
 
 public class Menu extends JMenuBar {
     public Menu(ICardControls controls) {
@@ -30,3 +31,5 @@ public class Menu extends JMenuBar {
         this.add(roomsMenu);
     }
 }
+
+

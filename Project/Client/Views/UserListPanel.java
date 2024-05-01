@@ -89,7 +89,7 @@ public class UserListPanel extends JPanel {
  
     //mbh3
     //04/24/24 
-    //background color 
+    //background color, graying out user, 
     
     protected void updateUserListItem(long clientId) {
         logger.log(Level.INFO, "Updating display color for user with ID: " + clientId);
@@ -115,7 +115,6 @@ public class UserListPanel extends JPanel {
         userListArea.revalidate();
         userListArea.repaint();
     }
-
    
     public void unmuteUser(long userId) {
         logger.log(Level.INFO, "Unmuting user list item for id " + userId);
