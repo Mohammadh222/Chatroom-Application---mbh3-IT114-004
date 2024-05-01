@@ -212,7 +212,7 @@ public class ServerThread extends Thread {
 
     //mbh3 
     //04/24/24 
-    //process rollcommand applied 
+    //process 
 
     void processPayload(Payload p) {
         switch (p.getPayloadType()) {
@@ -485,3 +485,4 @@ public class ServerThread extends Thread {
         throw new UnsupportedOperationException("Unimplemented method 'setCurrentRoom'");
     }
 }
+
